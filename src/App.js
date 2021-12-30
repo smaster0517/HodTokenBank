@@ -5,13 +5,17 @@ import Withdraw from "./pages/Withdraw";
 import NavbarMenu from "./components/NavbarManu";
 import Deposit from "./pages/Deposit";
 import { init } from "../src/components/Web3Client";
+import OwnerUpdate from "./pages/admin/OwnerUpdate";
 
 let isInitiallized = false;
-
-function App() {
+const start = async () => {
   if (!isInitiallized) {
-    init();
+    return await init();
   }
+};
+function App() {
+  start();
+
   return (
     <div className="App">
       <BrowserRouter>
@@ -20,6 +24,7 @@ function App() {
           <Route exact path="/" element={<Home />} />
           <Route exact path="/deposit" element={<Deposit />} />
           <Route exact path="/withdraw" element={<Withdraw />} />
+          <Route exact path="/admin" element={<OwnerUpdate />} />
         </Routes>
       </BrowserRouter>
     </div>

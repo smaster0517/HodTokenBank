@@ -1,0 +1,11 @@
+.content {
+  max-width: 480px;
+  display: flex;
+  margin: 60px auto;
+  background-color: rgb(180, 233, 180);
+}
+
+.content .btn {
+  padding: 20px;
+  margin-right: 20px;
+}

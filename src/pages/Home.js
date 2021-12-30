@@ -1,73 +1,152 @@
-import timlockbuild from "contracts/TimeLock.json";
+import timlockbuild from "contracts/HodleBank.json";
 import Web3 from "web3";
 import { useEffect, useState } from "react";
-import { selectedAccount } from "../../src/components/Web3Client";
+import './Home.css'
+import UpdateCT from "./UpdateCT";
 let provider = window.ethereum;
 const web3 = new Web3(provider);
 const timeAbi = timlockbuild.abi;
-const timeAdd = "0xB4ef72baDB7a090036C97e18966FCe162f0434f1";
-const timlockcontract = new web3.eth.Contract(timeAbi, timeAdd);
+let networkId;
+let hodleBankAddress;
+let timlockcontract;
+const start = async () => {
+  networkId = await web3.eth.net.getId();
+  hodleBankAddress = timlockbuild.networks[networkId].address;
+  timlockcontract = new web3.eth.Contract(timeAbi, hodleBankAddress);
+};
+start();
 
 export default function Home() {
-  const [boxnum, setBoxNum] = useState(null);
-  const [beneficiary2, setBeneficiary2] = useState("");
-  const [tokenAddress2, setTokenAddress2] = useState("");
-  const [tokenBalance2, setTokenBalance2] = useState("");
-  const [releaseTime2, setReleaseTime2] = useState("");
+  const [boxnum, setBoxNum] = useState('');
   const [beneficiary, setBeneficiary] = useState("");
   const [tokenAddress, setTokenAddress] = useState("");
   const [releaseTime, setReleaseTime] = useState("");
   const [tokenBalance, setTokenBalance] = useState("");
+  const [status, setStatus] = useState('');
+  const [boxnum2, setBoxNum2] = useState('');
+  const [beneficiaryCoin, setBeneficiaryCoin] = useState("");
+  const [coinSymbol, setCoinSymbol] = useState("");
+  const [releaseTimeCoin, setReleaseTimeCoin] = useState("");
+  const [coinBalance, setCoinBalance] = useState("");
+  const [statusCoin, setStatusCoin] = useState('');
   const [loc, setLoc] = useState(false);
+  const [loc2, setLoc2] = useState(false);
 
-  useEffect(() => {
-    setBeneficiary(beneficiary2);
-    setTokenAddress(tokenAddress2);
-    setReleaseTime(releaseTime2);
-    setTokenBalance(tokenBalance2);
-  }, [beneficiary2, tokenBalance2, tokenAddress2, releaseTime2]);
+
+  const lockCoin = (e) => {
+    e.preventDefault();
+    try {
+      if (!boxnum2 == "") {
+        lockBoxCoin(boxnum2).then((tx) => {
+          setBeneficiaryCoin(tx['beneficiary']);
+          setCoinSymbol(tx['coinName']);
+          setCoinBalance(tx["balance"]);
+          let a = new Date((tx['releaseTime']) * 1000);
+          let date = a.getDate()
+          let month = a.getMonth() + 1
+          let year = a.getFullYear()
+          let hour = a.getHours()
+          let min = a.getMinutes()
+          let time = date + '-' + month + '-' + year + ':' + hour + ':' + min
+          setReleaseTimeCoin(time)
+          tx.status ? setStatusCoin('Active') : setStatusCoin('Not Active')
+          console.log(tx)
+          setLoc2(true);
+        });
+      } else {
+        console.log("error");
+      }
+
+    } catch (error) {
+      console.log(error)
+    }
+
+  };
+
+
+
   const lockbox = (e) => {
     e.preventDefault();
-    if (!+boxnum == null || !+boxnum == "") {
-      lockBoxStructs(boxnum).then((tx) => {
-        console.log(tx[0]);
-        setBeneficiary2(tx[0]);
-        setTokenAddress2(tx[1]);
-        setTokenBalance2(tx[2]);
-        setReleaseTime2(tx[3]);
-        setLoc(true);
-        console.log(tx);
-      });
-    } else {
-      console.log("error");
+    try {
+      if (!boxnum == "") {
+        lockBoxStructs(boxnum).then((tx) => {
+          setBeneficiary(tx['beneficiary']);
+          setTokenAddress(tx['token']);
+          setTokenBalance(tx["balance"]);
+          let a = new Date((tx['releaseTime']) * 1000);
+          let date = a.getDate()
+          let month = a.getMonth() + 1
+          let year = a.getFullYear()
+          let hour = a.getHours()
+          let min = a.getMinutes()
+          let time = date + '-' + month + '-' + year + ':' + hour + ':' + min
+          setReleaseTime(time)
+          tx.status ? setStatus('Active') : setStatus('Not Active')
+
+          setLoc(true);
+          console.log(tx);
+        });
+      } else {
+        console.log("error");
+      }
+
+    } catch (error) {
+      console.log(error)
     }
+
   };
 
-  const boxlength = (e) => {
-    e.preventDefault();
-    lockBoxlength();
-  };
+
   return (
     <>
+
+      <>
+        {loc2 && (
+          <div className='home'>
+            <div className='content'>
+              <h3>Beneficiary: </h3>
+              <p>{beneficiaryCoin}</p>
+            </div>
+            <div className='content'>
+              <h3>Balance: </h3>
+              <p>{coinBalance}</p>
+            </div>
+            <div className='content'>
+              <h3> Symbol: </h3>
+              <p>{coinSymbol}</p>
+            </div>
+            <div className='content'>
+              <h3>ReleaseTime:</h3> <p>{releaseTimeCoin}</p>
+            </div>
+            <div className='content'>
+              <h3>Status:</h3> <p>{statusCoin}</p>
+            </div>
+            <UpdateCT vaultNum={boxnum2} />
+          </div>
+        )}
+      </>
       <>
         {loc && (
-          <div>
-            <div>
-              <h2>Beneficiary: </h2>
+          <div className='home'>
+            <div className='content'>
+              <h3>Beneficiary: </h3>
               <p>{beneficiary}</p>
             </div>
-            <div>
-              <h2>Balance: </h2>
+            <div className='content'>
+              <h3>Balance: </h3>
               <p>{tokenBalance}</p>
             </div>
-            <div>
-              {" "}
-              <h2> tokenAddress: </h2>
+            <div className='content'>
+              <h3> tokenAddress: </h3>
               <p>{tokenAddress}</p>
             </div>
-            <div>
-              <h2>ReleaseTime:</h2> <p>{releaseTime}</p>
+            <div className='content'>
+              <h3>ReleaseTime:</h3> <p>{releaseTime}</p>
             </div>
+            <div className='content'>
+              <h3>Status:</h3> <p>{status}</p>
+            </div>
+            <UpdateCT />
           </div>
         )}
       </>
@@ -75,7 +154,6 @@ export default function Home() {
         <div>
           <form>
             <label>
-              <span> getLocker Content</span>
               <input
                 type="text"
                 onChange={(e) => {
@@ -83,8 +161,19 @@ export default function Home() {
                 }}
               />
             </label>
-            <button onClick={lockbox}>UnLockBox</button>
-            <button onClick={boxlength}>Boxlength</button>
+            <button onClick={lockbox} >UnLockTokenBox</button>
+
+          </form>
+          <form>
+            <label>
+              <input
+                type="text"
+                onChange={(e) => {
+                  setBoxNum2(e.target.value);
+                }}
+              />
+            </label>
+            <button onClick={lockCoin}>UnLockCoinBox</button>
           </form>
         </div>
       </>
@@ -98,11 +187,9 @@ const lockBoxStructs = (boxnum) => {
   return tim;
 };
 
-const lockBoxlength = async () => {
-  return await timlockcontract.methods
-    .getStructBoxLenght()
-    .call()
-    .then((tx) => {
-      alert(`your Lock ID is, ${tx}`);
-    });
+const lockBoxCoin = (boxnum) => {
+  const tim = timlockcontract.methods.lockCoins(boxnum).call();
+
+  return tim;
 };
+

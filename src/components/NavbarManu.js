@@ -13,6 +13,7 @@ export default function NavbarMenu() {
           <NavLink to="/">Home</NavLink>
           <NavLink to="/deposit">Deposit</NavLink>
           <NavLink to="/withdraw">Withdraw</NavLink>
+          <NavLink to="/admin">Admin</NavLink>
         </nav>
       </div>
     </>
